@@ -63,10 +63,18 @@ flags are `--spec-type draft-mtp` and `--spec-draft-n-max`.
 ```bash
 llama-server \
   -m Athena-4B-MTP.i1-Q4_K_S.gguf \
-  -c 4096 -ngl 99 -fa on --jinja \
+  --mmproj Athena-4B-MTP.mmproj-Q8_0.gguf \
+  -c 131072 -ngl 99 -fa on --jinja \
+  -ctk q8_0 -ctv q8_0 \
   --spec-type draft-mtp --spec-draft-n-max 2 \
   --port 8080
 ```
+
+That is a **128k context with an 8-bit KV cache**. The cost is arithmetic: 33 layers x 4 KV heads
+x 256 dim x 2 (K and V) x 1.0625 B for `q8_0` is about **70 KiB per token**, so 128k is ~8.8 GiB
+of KV on top of the 2.6 GiB model. Verified on the Radeon 890M: it loads and generates (24
+drafted, 18 accepted, 36.8 tok/s). `-fa on` is required for a quantized KV cache. If it does not
+fit, lower `-c` first, then try `-ctk q4_0 -ctv q4_0`.
 
 ```bash
 curl http://127.0.0.1:8080/v1/chat/completions \
@@ -79,7 +87,9 @@ curl http://127.0.0.1:8080/v1/chat/completions \
 ```bash
 llama-cli \
   -m Athena-4B-MTP.i1-Q4_K_S.gguf \
-  -p "What is 17 times 3?" -n 64 -ngl 99 --temp 0.7 \
+  --mmproj Athena-4B-MTP.mmproj-Q8_0.gguf \
+  -p "What is 17 times 3?" -n 64 -c 131072 -ngl 99 --temp 0.7 -fa on \
+  -ctk q8_0 -ctv q8_0 \
   --spec-type draft-mtp --spec-draft-n-max 2
 ```
 
@@ -95,8 +105,8 @@ llama-cli \
 `2` is the best throughput here. On a faster GPU, `3` may win: the drafts cost less there.
 
 **Vision.** The base model is multimodal. The projector ships with the release as
-`Athena-4B-MTP.mmproj-Q8_0.gguf` (350 MiB, sha256
-`c9605ff1…`); pass `--mmproj <file>` if you need image input.
+`Athena-4B-MTP.mmproj-Q8_0.gguf` (350 MiB). Both commands above attach it with `--mmproj`;
+drop that flag (and the ~350 MiB) if you only need text.
 
 **Builds without MTP.** The file still loads; `blk.32.*` is reported as unused and decoding falls
 back to normal. Nothing breaks.

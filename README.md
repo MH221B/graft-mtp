@@ -108,15 +108,13 @@ tensors. It consumes the verifier's post-output-norm hidden state `h_t` and the 
 **next** token `e_{t+1}`, and predicts token `t+2`. It has its own KV cache. The 32-block verifier
 then accepts a prefix of each draft.
 
-`docs/notes/mtp-forward.md` pins the exact forward from the llama.cpp source.
+The forward above is pinned against the llama.cpp source in `src/models/qwen35.cpp` and
+`common/speculative.cpp`; the block is shape-identical to block 31.
 
 ## Repository layout
 
 ```text
 tools/train/mtp/          graft, harvest, trainer, packaging, eval harness
-docs/superpowers/specs/   the design of record (11 revisions)
-docs/superpowers/plans/   the 17-task implementation plan and its outcome
-docs/notes/mtp-forward.md the pinned MTP forward
 patches/llama.cpp/        the nextn-dump patch for llama-imatrix (harvest)
 bench/mtp-alignment/      measured acceptance JSON and a summary
 ```
@@ -136,6 +134,6 @@ python -m tools.train.mtp.eval_accept tools/train/mtp/configs/mtp-alignment.toml
 ## Limits
 
 - 100 prompts, one GPU, one quantization. Treat the numbers as this machine's, not universal.
-- The aligned head is absent; see `docs/superpowers/specs/` revision 11 for what was tried and why
-  it failed.
+- The aligned head is absent. It was trained for 216 steps and measured 63.18% at `n_max` 2
+  against the required 87.6%; the numbers are in `bench/mtp-alignment/results.md`.
 - The 1D head norms are F32 and the 2D head tensors f16; the head is deliberately not quantized.

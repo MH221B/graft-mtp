@@ -34,10 +34,7 @@ The gate needed 87.6% at `n_max` 2 (B's 82.61% plus 5 points). D is 24.4 points 
 than B at every `n_max`. The trainer was verified correct before this run: the input pairing
 (`e_{t+1}`, not `e_t`) and fp32 master weights were both fixed, and all 15 head tensors moved.
 
-The failure mode is worth recording: weighted CE fell from 0.674 to 0.09 while acceptance fell 19
-points. The head became more confident about the same predictions - it fitted the corpus's
-next-next distribution rather than the verifier's behaviour on unseen prompts. See the spec,
-revision 11.
+The failure mode is worth recording: weighted CE fell from 0.674 to 0.09 while acceptance fell 19 points. The head became more confident about the same predictions - it fitted the corpus's next-next distribution rather than the verifier's behaviour on unseen prompts.
 
 Raw data: `D-rejected.json`.
 

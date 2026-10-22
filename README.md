@@ -29,6 +29,8 @@ Two things were fixed relative to a naive graft, and they matter:
 
 ## Download
 
+**Release:** https://github.com/MH221B/graft-mtp/releases/tag/v1.0
+
 The GGUF is 2,805,112,832 bytes, above GitHub's 2 GiB release-asset limit, so the release ships it
 in two parts. Reassemble, then verify.
 
@@ -92,8 +94,9 @@ llama-cli \
 
 `2` is the best throughput here. On a faster GPU, `3` may win: the drafts cost less there.
 
-**Vision.** The base model is multimodal. The projector is a separate file
-(`mmproj-Q8_0.gguf`, ~340 MB) and is not included; pass `--mmproj <file>` if you need image input.
+**Vision.** The base model is multimodal. The projector ships with the release as
+`Qwen3.5-4B-MultiDistill-3xMerge-UNCENSORED-heretic.mmproj-Q8_0.gguf` (350 MiB, sha256
+`c9605ff1…`); pass `--mmproj <file>` if you need image input.
 
 **Builds without MTP.** The file still loads; `blk.32.*` is reported as unused and decoding falls
 back to normal. Nothing breaks.

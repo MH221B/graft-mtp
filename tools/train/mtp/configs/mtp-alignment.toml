@@ -1,6 +1,6 @@
 [paths]
 verifier_gguf = "models/qwen35-mtp/Qwen3.5-4B-MultiDistill-3xMerge-UNCENSORED-heretic.i1-Q4_K_S.gguf"
-mmproj = "models/qwen35-mtp/Qwen3.5-4B-MultiDistill-3xMerge-UNCENSORED-heretic.mmproj-Q8_0.gguf"
+mmproj = "models/qwen35-mtp/Athena-4B-MTP.mmproj-Q8_0.gguf"
 llama_server = "llama-cpp/llama-server.exe"
 llama_imatrix = "llama-cpp/llama-imatrix.exe"
 dump_tool = "llama.cpp-src/build-harvest/bin/llama-imatrix.exe"

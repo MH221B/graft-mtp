@@ -22,3 +22,6 @@ __pycache__/
 # OS
 Thumbs.db
 .DS_Store
+
+# Local design notes and plans (kept out of the published repo)
+docs/

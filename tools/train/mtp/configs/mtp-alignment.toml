@@ -1,0 +1,52 @@
+[paths]
+verifier_gguf = "models/qwen35-mtp/Qwen3.5-4B-MultiDistill-3xMerge-UNCENSORED-heretic.i1-Q4_K_S.gguf"
+mmproj = "models/qwen35-mtp/Qwen3.5-4B-MultiDistill-3xMerge-UNCENSORED-heretic.mmproj-Q8_0.gguf"
+llama_server = "llama-cpp/llama-server.exe"
+llama_imatrix = "llama-cpp/llama-imatrix.exe"
+dump_tool = "llama.cpp-src/build-harvest/bin/llama-imatrix.exe"
+model_id = "RBergBauer/Qwen3.5-4B-MTP-Heretic"
+hf_dir = "models/qwen35-mtp/hf"
+selfgen_jsonl = "datasets/selfgen.jsonl"
+prompts = "tools/train/mtp/prompts.jsonl"
+
+[run]
+run_id = "run1"
+seed = 1234
+
+[corpus]
+total_tokens = 2_000_000
+share_nohurry = 0.38
+share_roman = 0.285
+share_jackrong = 0.285
+share_selfgen = 0.05
+chunk_tokens = 100_000
+val_fraction = 0.05
+
+[harvest]
+max_seq = 4096          # the harvest context; corpus rows are truncated to this
+
+[train]
+# "auto" resolves to the HIP accelerator when torch sees one, else CPU with a warning.
+# Pin it to "cuda" to make a silent CPU regression a hard failure.
+device = "auto"
+seq_len = 2048
+batch_size = 8
+micro_batch = 1
+lr = 2e-4
+epochs = 2
+checkpoint_steps = 50
+checkpoint_minutes = 5
+proxy_every = 100
+
+[package]
+head_type = "F16"         # the head is not quantized; only F16 is supported
+norm_type = "F32"         # the 1D head norms stay F32 in every artifact
+
+[eval]
+# Acceptance is measured on prompts whose generations are NOT in the corpus: the selfgen
+# prompts are, so they cannot double as the eval set.
+prompts = "tools/train/mtp/prompts-eval.jsonl"
+n_max = [1, 2, 3]
+max_new_tokens = 128
+temperature = 0.7
+lossless_prompts = 50

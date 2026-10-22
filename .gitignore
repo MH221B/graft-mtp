@@ -1,0 +1,24 @@
+# Build outputs and toolchains
+llama.cpp-src/
+llama-cpp/
+.venv-rocm/
+.venv/
+
+# Weights, caches and datasets (multi-GB, never committed)
+models/
+runs/
+datasets/
+*.gguf
+*.safetensors
+*.bin
+*.npy
+*.pt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+Thumbs.db
+.DS_Store

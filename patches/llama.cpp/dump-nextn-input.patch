@@ -1,0 +1,368 @@
+diff --git a/common/arg.cpp b/common/arg.cpp
+index 2acac3b5c..2e04dd806 100644
+--- a/common/arg.cpp
++++ b/common/arg.cpp
+@@ -3206,6 +3206,41 @@ common_params_context common_params_parser_init(common_params & params, llama_ex
+             params.parse_special = true;
+         }
+     ).set_examples({LLAMA_EXAMPLE_IMATRIX}));
++    add_opt(common_arg(
++        {"--tokens"}, "FILE",
++        "read int32 token ids from FILE instead of tokenizing the input",
++        [](common_params & params, const std::string & value) {
++            params.tokens_file = value;
++        }
++    ).set_examples({LLAMA_EXAMPLE_IMATRIX}));
++    add_opt(common_arg(
++        {"--dump-nextn-dir"}, "DIR",
++        "write the trunk nextn hidden state to DIR/chunk-NNNNN.hidden.bin and exit",
++        [](common_params & params, const std::string & value) {
++            params.dump_nextn_dir = value;
++        }
++    ).set_examples({LLAMA_EXAMPLE_IMATRIX}));
++    add_opt(common_arg(
++        {"--dump-nextn-seqs"}, "FILE",
++        "int32 (offset, length) pairs: row boundaries inside the --tokens file; each row is its own context",
++        [](common_params & params, const std::string & value) {
++            params.dump_nextn_seqs = value;
++        }
++    ).set_examples({LLAMA_EXAMPLE_IMATRIX}));
++    add_opt(common_arg(
++        {"--chunk-index"}, "N",
++        string_format("chunk index used in the dump file names (default: %d)", params.chunk_index),
++        [](common_params & params, int value) {
++            params.chunk_index = value;
++        }
++    ).set_examples({LLAMA_EXAMPLE_IMATRIX}));
++    add_opt(common_arg(
++        {"--dump-mtp-out"},
++        "also run the MTP block and dump its output hidden state and logits (probe only)",
++        [](common_params & params) {
++            params.dump_mtp_out = true;
++        }
++    ).set_examples({LLAMA_EXAMPLE_IMATRIX}));
+     add_opt(common_arg(
+         {"--ids"},
+         string_format("only print the token IDs, in a Python-parseable list form like [1, 2, 3] (default: %s)", params.tokenize_ids ? "true" : "false"),
+diff --git a/common/common.h b/common/common.h
+index 527f4be7d..a716aff3e 100644
+--- a/common/common.h
++++ b/common/common.h
+@@ -725,6 +725,13 @@ struct common_params {
+     bool show_statistics = false; // show imatrix statistics per tensor
+     bool parse_special   = false; // whether to parse special tokens during imatrix tokenization
+ 
++    // nextn dump params (harvest uses these; see tools/imatrix --dump-nextn-dir)
++    std::string tokens_file;     // read token ids from this file instead of tokenizing a prompt
++    std::string dump_nextn_dir;  // write the nextn input rows here
++    std::string dump_nextn_seqs; // int32 (offset, length) pairs: row boundaries inside tokens_file
++    int32_t     chunk_index = 0; // chunk index used in the dump file names
++    bool        dump_mtp_out = false; // also run the MTP block and dump its output and logits (probe only)
++
+     // cvector-generator params
+     int n_pca_batch = 100;
+     int n_pca_iterations = 1000;
+diff --git a/tools/imatrix/imatrix.cpp b/tools/imatrix/imatrix.cpp
+index f5fee6218..3d4269041 100644
+--- a/tools/imatrix/imatrix.cpp
++++ b/tools/imatrix/imatrix.cpp
+@@ -4,6 +4,7 @@
+ #include "log.h"
+ #include "llama.h"
+ #include "gguf.h"
++#include "../../src/llama-ext.h" // staging API: llama_set_embeddings_nextn / llama_get_embeddings_nextn_ith
+ 
+ #include <algorithm>
+ #include <chrono>
+@@ -1074,6 +1075,242 @@ static bool show_statistics(const common_params & params) {
+     return true;
+ }
+ 
++static bool write_floats(const std::string & dir, int chunk, const char * suffix, const std::vector<float> & data) {
++    char path[1024];
++    snprintf(path, sizeof(path), "%s/chunk-%05d.%s.bin", dir.c_str(), chunk, suffix);
++    FILE * f = fopen(path, "wb");
++    if (f == nullptr) {
++        LOG_ERR("%s: cannot write %s\n", __func__, path);
++        return false;
++    }
++    const size_t written = fwrite(data.data(), sizeof(float), data.size(), f);
++    fclose(f);
++    if (written != data.size()) {
++        LOG_ERR("%s: short write to %s\n", __func__, path);
++        return false;
++    }
++    LOG_INF("%s: wrote %s (%zu floats)\n", __func__, path, data.size());
++    return true;
++}
++
++static std::vector<int32_t> read_i32_file(const std::string & path) {
++    FILE * f = fopen(path.c_str(), "rb");
++    if (f == nullptr) {
++        throw std::runtime_error("cannot open " + path);
++    }
++    fseek(f, 0, SEEK_END);
++    const long bytes = ftell(f);
++    fseek(f, 0, SEEK_SET);
++    if (bytes < 0 || bytes % (long) sizeof(int32_t) != 0) {
++        fclose(f);
++        throw std::runtime_error("not a whole number of int32 values: " + path);
++    }
++    std::vector<int32_t> data(bytes / sizeof(int32_t));
++    const size_t n = fread(data.data(), sizeof(int32_t), data.size(), f);
++    fclose(f);
++    if (n != data.size()) {
++        throw std::runtime_error("short read: " + path);
++    }
++    return data;
++}
++
++static bool dump_mtp_output(
++        llama_model * model,
++        llama_context * ctx_tgt,
++        const common_params & params,
++        const std::vector<int32_t> & ids,
++        const std::vector<float> & hidden,
++        const int n_embd);
++
++// Dump the trunk's nextn hidden state for every token of the --tokens file.
++//
++// The hidden state is the one after model.output_norm (see docs/notes/mtp-forward.md). Rows
++// from --dump-nextn-seqs are decoded one at a time, each with a cleared KV: a row decoded
++// after another row would attend to it, and those are not the states the runtime produces.
++static bool dump_nextn_hidden(llama_model * model, llama_context * ctx, const common_params & params) {
++    const int n_embd  = llama_model_n_embd(model);
++    const int n_batch = params.n_batch;
++
++    std::vector<int32_t> ids;
++    std::vector<int32_t> seqs;
++    try {
++        ids = read_i32_file(params.tokens_file);
++        if (!params.dump_nextn_seqs.empty()) {
++            seqs = read_i32_file(params.dump_nextn_seqs);
++        }
++    } catch (const std::exception & err) {
++        LOG_ERR("%s: %s\n", __func__, err.what());
++        return false;
++    }
++
++    if (seqs.size() % 2 != 0) {
++        LOG_ERR("%s: --dump-nextn-seqs must hold (offset, length) pairs\n", __func__);
++        return false;
++    }
++
++    llama_set_embeddings_nextn(ctx, true, false);
++
++    std::vector<float> hidden;
++    hidden.reserve(ids.size() * n_embd);
++
++    const int n_rows = seqs.empty() ? 1 : (int) seqs.size() / 2;
++    LOG_INF("%s: %d rows, %zu tokens, n_embd = %d, n_batch = %d\n", __func__, n_rows, ids.size(), n_embd, n_batch);
++
++    for (int r = 0; r < n_rows; ++r) {
++        const int off = seqs.empty() ? 0 : seqs[2*r + 0];
++        const int len = seqs.empty() ? (int) ids.size() : seqs[2*r + 1];
++        if (off < 0 || len <= 0 || off + len > (int) ids.size()) {
++            LOG_ERR("%s: row %d (offset %d, length %d) is outside the token file\n", __func__, r, off, len);
++            return false;
++        }
++
++        llama_memory_clear(llama_get_memory(ctx), true);
++
++        for (int start = 0; start < len; start += n_batch) {
++            const int n = std::min(n_batch, len - start);
++            llama_batch batch = llama_batch_init(n, 0, 1);
++            for (int k = 0; k < n; ++k) {
++                common_batch_add(batch, ids[off + start + k], start + k, { 0 }, false);
++            }
++            const int ret = llama_decode(ctx, batch);
++            llama_batch_free(batch);
++            if (ret != 0) {
++                LOG_ERR("%s: llama_decode failed (%d) at row %d\n", __func__, ret, r);
++                return false;
++            }
++            for (int k = 0; k < n; ++k) {
++                const float * h = llama_get_embeddings_nextn_ith(ctx, k);
++                hidden.insert(hidden.end(), h, h + n_embd);
++            }
++        }
++    }
++
++    if (!write_floats(params.dump_nextn_dir, params.chunk_index, "hidden", hidden)) {
++        return false;
++    }
++
++    if (!params.dump_mtp_out) {
++        return true;
++    }
++    if (n_rows != 1) {
++        LOG_ERR("%s: --dump-mtp-out needs exactly one row (it is a probe, not a harvest)\n", __func__);
++        return false;
++    }
++
++    return dump_mtp_output(model, ctx, params, ids, hidden, n_embd);
++}
++
++// Run the MTP block itself and dump its output hidden state and logits (probe only).
++//
++// This is the fidelity check: the block is the runtime's own graph, fed the same
++// post-output-norm hidden state the harvest collected. Its output must match a PyTorch
++// reimplementation loaded from the same weights, or the head being trained is not the head
++// the runtime will run.
++static bool dump_mtp_output(
++        llama_model * model,
++        llama_context * ctx_tgt,
++        const common_params & params,
++        const std::vector<int32_t> & ids,
++        const std::vector<float> & hidden,
++        const int n_embd) {
++    const int n = (int) ids.size();
++
++    // Mirror common_speculative_init: the draft context takes the target's context length,
++    // shares its other-context reference, and uses the same converted params. A context
++    // built from defaults instead crashes inside the graph.
++    auto cparams = common_context_params_to_llama(params);
++    cparams.ctx_type  = LLAMA_CONTEXT_TYPE_MTP;
++    cparams.n_ctx     = llama_n_ctx(ctx_tgt);
++    cparams.n_rs_seq  = 0;
++    cparams.ctx_other = ctx_tgt;
++
++    LOG_INF("%s: creating the MTP context (n_ctx = %u)\n", __func__, llama_n_ctx(ctx_tgt));
++    llama_context * ctx_mtp = llama_init_from_model(model, cparams);
++    if (ctx_mtp == nullptr) {
++        LOG_ERR("%s: failed to create the MTP context\n", __func__);
++        return false;
++    }
++    LOG_INF("%s: MTP context ready\n", __func__);
++
++    llama_set_embeddings_nextn(ctx_mtp, true, false);
++
++    llama_batch batch = llama_batch_init(n, n_embd, 1);
++    // llama_batch_init allocates only one of token/embd; the MTP block needs both (the token
++    // for the embedding lookup, the buffer for the trunk hidden state).
++    batch.token = (llama_token *) malloc(sizeof(llama_token) * n);
++    for (int i = 0; i < n; ++i) {
++        common_batch_add(batch, ids[i], i, { 0 }, true);
++        memcpy(batch.embd + (size_t) i * n_embd, hidden.data() + (size_t) i * n_embd, n_embd * sizeof(float));
++    }
++
++    LOG_INF("%s: decoding %d tokens through the MTP block\n", __func__, n);
++    const int ret = llama_decode(ctx_mtp, batch);
++    llama_batch_free(batch);
++    if (ret != 0) {
++        LOG_ERR("%s: MTP decode failed (%d)\n", __func__, ret);
++        llama_free(ctx_mtp);
++        return false;
++    }
++    LOG_INF("%s: MTP decode done, reading back\n", __func__);
++
++    std::vector<float> out;
++    out.reserve((size_t) n * n_embd);
++    for (int i = 0; i < n; ++i) {
++        const float * h = llama_get_embeddings_nextn_ith(ctx_mtp, i);
++        out.insert(out.end(), h, h + n_embd);
++    }
++
++    const int n_vocab = llama_vocab_n_tokens(llama_model_get_vocab(model));
++    std::vector<float> logits;
++    logits.reserve((size_t) n * n_vocab);
++    for (int i = 0; i < n; ++i) {
++        const float * l = llama_get_logits_ith(ctx_mtp, i);
++        logits.insert(logits.end(), l, l + n_vocab);
++    }
++
++    const bool ok = write_floats(params.dump_nextn_dir, params.chunk_index, "out",    out) &&
++                    write_floats(params.dump_nextn_dir, params.chunk_index, "logits", logits);
++
++    llama_free(ctx_mtp);
++    return ok;
++}
++
++// Debug: print the first few values of the MTP graph's named intermediate tensors, so a
++// mismatch with the PyTorch head can be localised to a node instead of guessed at.
++static bool mtp_debug_cb(struct ggml_tensor * t, bool ask, void * /*user_data*/) {
++    if (ask) {
++        return true;
++    }
++    const char * name = ggml_get_name(t);
++    if (name == nullptr) {
++        return true;
++    }
++    static const char * want[] = {
++        "mtp_tok_embd", "mtp_h_input", "mtp_hnorm", "mtp_enorm", "mtp_concat",
++        "mtp_eh_proj", "mtp_attn_norm", "mtp_attn_out", "mtp_post_ffn",
++        "h_nextn", "result_output",
++    };
++    bool hit = false;
++    for (const char * w : want) {
++        // cb() appends "-<layer>" when a layer index is passed, so compare the prefix.
++        if (strncmp(name, w, strlen(w)) == 0) {
++            hit = true;
++            break;
++        }
++    }
++    if (!hit) {
++        return true;
++    }
++    float buf[4] = { 0, 0, 0, 0 };
++    const size_t n = std::min<size_t>(4, ggml_nelements(t));
++    if (t->buffer != nullptr) {
++        ggml_backend_tensor_get(t, buf, 0, n * sizeof(float));
++    }
++    LOG_INF("DBG %-16s ne=[%lld,%lld] row0: %.6f %.6f %.6f %.6f\n",
++            name, (long long) t->ne[0], (long long) t->ne[1], buf[0], buf[1], buf[2], buf[3]);
++    return true;
++}
++
+ int main(int argc, char ** argv) {
+     std::setlocale(LC_NUMERIC, "C");
+ 
+@@ -1127,7 +1364,7 @@ int main(int argc, char ** argv) {
+         }
+     }
+ 
+-    if (params.prompt.empty()) {
++    if (params.prompt.empty() && params.dump_nextn_dir.empty()) {
+         LOG_INF("No prompt provided; combining precomputed matrices only.\n");
+ 
+         if (params.in_files.empty()) {
+@@ -1151,10 +1388,20 @@ int main(int argc, char ** argv) {
+ 
+     // pass the callback to the backend scheduler
+     // it will be executed for each node during the graph computation
+-    params.cb_eval = ik_collect_imatrix;
+-    params.cb_eval_user_data = NULL;
++    if (params.dump_nextn_dir.empty()) {
++        params.cb_eval = ik_collect_imatrix;
++        params.cb_eval_user_data = NULL;
++    }
+     params.warmup = false;
+ 
++    // The MTP layer's tensors are skipped at load time unless a speculative type asks for
++    // them, so the probe must ask before the model is loaded, not before the context is made.
++    if (params.dump_mtp_out) {
++        params.speculative.types.push_back(COMMON_SPECULATIVE_TYPE_DRAFT_MTP);
++        params.cb_eval          = mtp_debug_cb;
++        params.cb_eval_user_data = nullptr;
++    }
++
+     // init
+     auto llama_init = common_init_from_params(params);
+ 
+@@ -1178,6 +1425,16 @@ int main(int argc, char ** argv) {
+         LOG_INF("%s\n", common_params_get_system_info(params).c_str());
+     }
+ 
++    if (!params.dump_nextn_dir.empty()) {
++        if (params.tokens_file.empty()) {
++            LOG_ERR("%s: --dump-nextn-dir needs --tokens\n", __func__);
++            return 1;
++        }
++        const bool ok = dump_nextn_hidden(model, ctx, params);
++        llama_backend_free();
++        return ok ? 0 : 1;
++    }
++
+     if (!compute_imatrix(ctx, params, n_ctx)) {
+         return 1;
+     }

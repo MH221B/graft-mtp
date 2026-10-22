@@ -1,0 +1,30 @@
+graft-mtp - Athena-4B-MTP
+=========================
+
+The model file is a graft of two works. Attribution and license follow.
+
+Base model
+----------
+xtools-at/Qwen3.5-4B-MultiDistill-3xMerge-UNCENSORED-heretic
+  https://huggingface.co/xtools-at/Qwen3.5-4B-MultiDistill-3xMerge-UNCENSORED-heretic
+  License: Apache-2.0
+
+Quantization
+------------
+mradermacher/Qwen3.5-4B-MultiDistill-3xMerge-UNCENSORED-heretic-i1-GGUF
+  i1-Q4_K_S. Quantized with llama.cpp's imatrix path.
+
+MTP head (block 32)
+-------------------
+RBergBauer/Qwen3.5-4B-MTP-Heretic
+  https://huggingface.co/RBergBauer/Qwen3.5-4B-MTP-Heretic
+  The 15 MTP tensors, grafted at f16. The 7 one-dimensional norms are stored as w + 1, the
+  convention the official Qwen converter uses.
+
+License
+-------
+Apache-2.0. The base model and the head are distributed under Apache-2.0; this graft keeps the
+same terms and does not add restrictions. Provenance keys in the GGUF (general.base_model.*,
+general.source.*, general.license) are preserved.
+
+No warranty. This is a merge of community weights, and the model card of the base model applies.

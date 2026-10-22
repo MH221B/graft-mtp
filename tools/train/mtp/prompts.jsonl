@@ -1,0 +1,198 @@
+{"prompt": "Solve for x: 3x + 7 = 2x + 19."}
+{"prompt": "A train leaves at 09:15 and arrives at 13:40. How long is the journey in hours and minutes?"}
+{"prompt": "Compute the sum of the first 50 positive integers and explain the formula you used."}
+{"prompt": "Factor x^2 - 5x + 6 and state the roots."}
+{"prompt": "What is the derivative of x^3 ln(x) with respect to x?"}
+{"prompt": "Integrate 2x cos(x^2) dx."}
+{"prompt": "Find the area of a triangle with sides 7, 24, and 25."}
+{"prompt": "A circle has circumference 31.4 cm. What is its area, to one decimal place?"}
+{"prompt": "Two dice are rolled. What is the probability that the sum is 8?"}
+{"prompt": "In a bag of 5 red and 3 blue marbles, what is the probability of drawing two reds without replacement?"}
+{"prompt": "Solve the system: 2x + y = 10, x - y = 2."}
+{"prompt": "Simplify (2^10 * 2^-4) / 2^2."}
+{"prompt": "What is 17% of 340?"}
+{"prompt": "Convert 72 km/h to metres per second."}
+{"prompt": "A rectangle has perimeter 44 and length 3 more than twice its width. Find its dimensions."}
+{"prompt": "Prove that the sum of two odd integers is even."}
+{"prompt": "Show that sqrt(2) is irrational."}
+{"prompt": "How many ways can you arrange the letters of MISSISSIPPI?"}
+{"prompt": "Find the limit as x approaches 0 of sin(3x)/x."}
+{"prompt": "What is the determinant of the matrix [[2,1],[5,3]]?"}
+{"prompt": "Solve 2^x = 32 for x."}
+{"prompt": "A car depreciates 12% per year. If it costs 25000 now, what is it worth after 3 years?"}
+{"prompt": "Compute 7! / (5! 2!)."}
+{"prompt": "Find the equation of the line through (2,3) and (6,11)."}
+{"prompt": "What is the volume of a sphere with radius 3 cm? Leave the answer in terms of pi."}
+{"prompt": "A fair coin is flipped 10 times. What is the probability of exactly 6 heads?"}
+{"prompt": "Simplify the expression (x^2 - 9)/(x - 3) for x not equal to 3."}
+{"prompt": "If f(x) = 2x + 1 and g(x) = x^2, find f(g(3))."}
+{"prompt": "What is the compound interest on 1000 at 5% annually for 4 years?"}
+{"prompt": "Find the median of 12, 7, 19, 4, 15, 22, 9."}
+{"prompt": "State Newton's second law and give a worked example with units."}
+{"prompt": "A 2 kg object accelerates at 3 m/s^2. What net force acts on it?"}
+{"prompt": "Explain why the sky appears blue, using the concept of scattering."}
+{"prompt": "Calculate the kinetic energy of a 1200 kg car moving at 20 m/s."}
+{"prompt": "What is the difference between mass and weight? Give an example of each."}
+{"prompt": "A ball is dropped from 45 m. Ignoring air resistance, how long until it hits the ground?"}
+{"prompt": "Derive the period of a simple pendulum for small oscillations."}
+{"prompt": "Explain the photoelectric effect and why it required a quantum explanation."}
+{"prompt": "What is entropy, and why does it tend to increase in isolated systems?"}
+{"prompt": "Describe how a refrigerator moves heat from cold to hot without violating the second law."}
+{"prompt": "Balance the chemical equation for the combustion of methane."}
+{"prompt": "What is the pH of a 0.01 M solution of HCl?"}
+{"prompt": "Explain why ice floats on water in terms of density."}
+{"prompt": "How many moles are in 88 g of carbon dioxide?"}
+{"prompt": "Describe the difference between ionic and covalent bonding with an example."}
+{"prompt": "What is an enzyme, and how does it lower the activation energy of a reaction?"}
+{"prompt": "Explain the role of ATP in cellular respiration."}
+{"prompt": "Compare mitosis and meiosis in a table."}
+{"prompt": "How does natural selection produce adaptation over many generations?"}
+{"prompt": "What is the difference between a prokaryotic and a eukaryotic cell?"}
+{"prompt": "Explain how vaccines produce immunity."}
+{"prompt": "Describe the structure and function of DNA."}
+{"prompt": "Explain recursion and give a simple example in pseudocode."}
+{"prompt": "What is the difference between a stack and a queue? Give a use case for each."}
+{"prompt": "Write pseudocode for binary search and state its time complexity."}
+{"prompt": "Explain Big O notation with three examples of different growth rates."}
+{"prompt": "What is a hash table collision, and how is it typically resolved?"}
+{"prompt": "Explain the difference between a process and a thread."}
+{"prompt": "What is a deadlock, and what four conditions are required for one?"}
+{"prompt": "Describe how virtual memory maps addresses to physical memory."}
+{"prompt": "Explain the difference between TCP and UDP."}
+{"prompt": "What happens, step by step, when you type a URL into a browser?"}
+{"prompt": "Explain the CAP theorem and give an example system for each tradeoff."}
+{"prompt": "What is a database index, and when does it hurt performance?"}
+{"prompt": "Write a SQL query that returns the top 3 customers by total order value."}
+{"prompt": "Explain the difference between an inner join and a left join with a small example."}
+{"prompt": "What is normalization in databases? Explain first, second and third normal form."}
+{"prompt": "Explain what a race condition is and how a mutex prevents it."}
+{"prompt": "What is the difference between a compiler and an interpreter?"}
+{"prompt": "Explain garbage collection and name two strategies."}
+{"prompt": "What is a monad, explained without jargon, with one practical example."}
+{"prompt": "Explain what test-driven development is and why it helps."}
+{"prompt": "What is continuous integration, and what should it run on every commit?"}
+{"prompt": "Explain the difference between a 400 and a 500 HTTP status code."}
+{"prompt": "What is idempotency in an API, and why does it matter for retries?"}
+{"prompt": "Explain the bias-variance tradeoff."}
+{"prompt": "What is overfitting, and name three ways to reduce it."}
+{"prompt": "Explain how a decision tree decides where to split."}
+{"prompt": "What is the difference between precision and recall? When would you prefer one over the other?"}
+{"prompt": "Explain cross-validation and why it is better than a single train/test split."}
+{"prompt": "What is gradient descent, and what does the learning rate control?"}
+{"prompt": "Explain the difference between L1 and L2 regularization."}
+{"prompt": "What is a confusion matrix used for?"}
+{"prompt": "Explain the central limit theorem in plain language."}
+{"prompt": "What is a p-value, and what are the most common mistakes in interpreting one?"}
+{"prompt": "Explain the difference between correlation and causation with an example."}
+{"prompt": "What is the difference between a parameter and a statistic?"}
+{"prompt": "Explain Bayes' theorem and give a medical-testing example."}
+{"prompt": "What is a normal distribution, and where do the 68-95-99.7 numbers come from?"}
+{"prompt": "Explain standard deviation versus variance."}
+{"prompt": "What is the difference between a population and a sample?"}
+{"prompt": "Explain the birthday problem and why the answer is surprising."}
+{"prompt": "What is a confidence interval, in words a non-statistician can use?"}
+{"prompt": "Explain the difference between a permutation and a combination."}
+{"prompt": "A farmer has 17 sheep and all but 9 run away. How many are left? Explain your reasoning."}
+{"prompt": "You have two ropes, each burns for exactly 60 minutes unevenly. How do you measure 45 minutes?"}
+{"prompt": "Three switches control three bulbs behind a closed door. You may enter once. How do you match them?"}
+{"prompt": "What is the next number in the sequence 2, 6, 12, 20, 30, and why?"}
+{"prompt": "Is it ever rational to choose a dominated option? Explain."}
+{"prompt": "Explain the prisoner's dilemma and its equilibrium."}
+{"prompt": "What is Occam's razor, and how is it used in scientific reasoning?"}
+{"prompt": "Explain the difference between deductive and inductive reasoning with examples."}
+{"prompt": "What is a false dichotomy? Give a realistic example."}
+{"prompt": "Explain survivorship bias with a concrete historical example."}
+{"prompt": "Summarize the argument that a stopped clock is right twice a day, and what it shows about accuracy."}
+{"prompt": "Explain what an invariant is in algorithm design, with an example from a sorting algorithm."}
+{"prompt": "What is the difference between depth-first and breadth-first search, and when would you choose each?"}
+{"prompt": "Explain dynamic programming and solve the coin-change problem for coins 1, 3, 4 and amount 6."}
+{"prompt": "Describe how quicksort partitions an array, step by step, for [4, 2, 7, 1, 9, 3]."}
+{"prompt": "What is the time complexity of merging two sorted lists of sizes n and m?"}
+{"prompt": "Explain why comparison sorting cannot beat O(n log n) in the worst case."}
+{"prompt": "What is a heap, and how is it used to implement a priority queue?"}
+{"prompt": "Explain Dijkstra's algorithm and the condition under which it fails."}
+{"prompt": "What is a topological sort, and which kind of problem needs one?"}
+{"prompt": "Explain memoization versus tabulation with the same recurrence."}
+{"prompt": "What is a trie, and when is it better than a hash map?"}
+{"prompt": "Explain the union-find data structure and path compression."}
+{"prompt": "What is the difference between a greedy algorithm and an optimal one? Give a counterexample."}
+{"prompt": "Explain how a bloom filter works and what its false-positive rate depends on."}
+{"prompt": "Describe consistent hashing and why it is used in distributed caches."}
+{"prompt": "What is a write-ahead log, and how does it make recovery possible?"}
+{"prompt": "Explain two-phase commit and one reason it can block."}
+{"prompt": "What is eventual consistency, and how do you design a client around it?"}
+{"prompt": "Explain how a B-tree differs from a binary search tree, and why databases prefer it."}
+{"prompt": "What is a memory-mapped file, and what are its tradeoffs?"}
+{"prompt": "Explain copy-on-write and where it appears in operating systems."}
+{"prompt": "What is a system call, and why can it be expensive?"}
+{"prompt": "Explain how a page fault is handled."}
+{"prompt": "What is thrashing, and how does the operating system avoid it?"}
+{"prompt": "Explain the difference between hard and soft links."}
+{"prompt": "What is a container, and how does it differ from a virtual machine?"}
+{"prompt": "Explain how DNS resolution works, including caching."}
+{"prompt": "What is TLS, and what does the handshake actually establish?"}
+{"prompt": "Explain symmetric versus asymmetric encryption with a use case for each."}
+{"prompt": "What is a hash function's role in password storage, and why is a salt necessary?"}
+{"prompt": "Explain what SQL injection is and how a prepared statement prevents it."}
+{"prompt": "What is the principle of least privilege, with a practical example."}
+{"prompt": "Explain what a man-in-the-middle attack requires to succeed."}
+{"prompt": "What is a zero-knowledge proof? Explain the idea with a simple analogy."}
+{"prompt": "Explain the difference between authentication and authorization."}
+{"prompt": "What is rate limiting for, and name two algorithms for it."}
+{"prompt": "Explain what a finite state machine is and model a traffic light with one."}
+{"prompt": "What is the difference between latency and throughput?"}
+{"prompt": "Explain Amdahl's law and its practical implication for optimization."}
+{"prompt": "What is a cache miss, and what are the three kinds?"}
+{"prompt": "Explain how a load balancer chooses a backend."}
+{"prompt": "What is backpressure, and how does a queue help or hurt it?"}
+{"prompt": "Explain the difference between vertical and horizontal scaling."}
+{"prompt": "What is a circuit breaker pattern and why does it help during outages?"}
+{"prompt": "Explain how a message queue decouples two services."}
+{"prompt": "What is observability, and how do logs, metrics and traces differ?"}
+{"prompt": "Explain what an SLO is and how it differs from an SLA."}
+{"prompt": "Explain the difference between a bug and a design flaw, with an example."}
+{"prompt": "How would you debug a program that works locally but fails in production?"}
+{"prompt": "Explain how to bisect a performance regression in a large codebase."}
+{"prompt": "What makes a unit test good? Name three properties."}
+{"prompt": "Explain the difference between a mock and a stub."}
+{"prompt": "What is a flaky test, and what usually causes one?"}
+{"prompt": "Explain how to review a large pull request efficiently."}
+{"prompt": "What is technical debt, and when is taking it on reasonable?"}
+{"prompt": "Explain the difference between a library and a framework."}
+{"prompt": "What is dependency injection for, in one paragraph?"}
+{"prompt": "Explain what an interface is and why it should be small."}
+{"prompt": "What is the difference between cohesion and coupling?"}
+{"prompt": "Explain the Liskov substitution principle with an example that violates it."}
+{"prompt": "What is a pure function, and what do you lose by making one impure?"}
+{"prompt": "Explain immutability and one performance cost of it."}
+{"prompt": "What is a closure? Give an example where it is useful."}
+{"prompt": "Explain the difference between concurrency and parallelism."}
+{"prompt": "What is an async/await runtime actually doing?"}
+{"prompt": "Explain how a thread pool bounds resource usage."}
+{"prompt": "What is a semaphore, and how does it differ from a mutex?"}
+{"prompt": "Explain atomic operations and why they are needed for lock-free code."}
+{"prompt": "What is false sharing and how do you avoid it?"}
+{"prompt": "Explain the difference between little-endian and big-endian storage."}
+{"prompt": "What is an ABI, and why does it matter for a shared library?"}
+{"prompt": "Explain what a linker does, step by step."}
+{"prompt": "What is undefined behaviour in C, and why is it dangerous?"}
+{"prompt": "Explain the difference between the stack and the heap."}
+{"prompt": "What is a smart pointer and which problem does it solve?"}
+{"prompt": "Explain how memory alignment affects performance and correctness."}
+{"prompt": "What is a SIMD instruction, and when can a compiler generate one?"}
+{"prompt": "Explain branch prediction and its effect on tight loops."}
+{"prompt": "What is a cache line, and why does iterating in the wrong order hurt?"}
+{"prompt": "Explain what quantization does to a neural network and what it costs."}
+{"prompt": "What is the difference between fp16, bf16 and fp32?"}
+{"prompt": "Explain how a transformer's attention mechanism works, in plain language."}
+{"prompt": "What is a KV cache, and why does it dominate memory at long context?"}
+{"prompt": "Explain speculative decoding and where its speedup comes from."}
+{"prompt": "What does a language model's temperature parameter change?"}
+{"prompt": "Explain the difference between pretraining and fine-tuning."}
+{"prompt": "What is knowledge distillation, and what does the student learn from the teacher?"}
+{"prompt": "Explain what a LoRA adapter changes about a model."}
+{"prompt": "What is a tokenizer, and why does its vocabulary size matter?"}
+{"prompt": "Explain rotary position embeddings in one paragraph."}
+{"prompt": "What is the difference between a mixture-of-experts model and a dense one?"}
+{"prompt": "Explain what gradient clipping prevents during training."}
+{"prompt": "What is learning-rate warmup for?"}

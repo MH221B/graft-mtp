@@ -1,0 +1,21 @@
+{
+  "artifact": "B-grafted-f16.gguf",
+  "probe_tokens": 256,
+  "probe_dtype": "float32",
+  "g1a_tolerance": 3.0,
+  "g1a_max_abs_delta_h_out": 1.8884391784667969,
+  "g1a_mean_abs_delta_h_out": 0.033838123083114624,
+  "g1a_p999_abs_delta_h_out": 0.2698032855987549,
+  "g1a_pass": true,
+  "g1b_draft_token_match": 0.99609375,
+  "g1b_min": 0.99,
+  "g1b_pass": true,
+  "g1c_max_abs_delta_logits": 0.5742583274841309,
+  "g1c_mean_abs_delta_logits": 0.0316968634724617,
+  "g1c_p999_abs_delta_logits": 0.17282743752002716,
+  "g1c_pass": true,
+  "g1c_source": "llama.cpp MTP context (--dump-mtp-out)",
+  "cache_check": "run on 2 chunks",
+  "cache_max_abs_delta": 0.0,
+  "cache_pass": true
+}
